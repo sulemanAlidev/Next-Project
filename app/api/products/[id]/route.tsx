@@ -1,16 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
+import schema from "../schema";
 
 export async function PUT(
   req: NextRequest,
   { params }: { params: { id: number } }
 ) {
   const body = await req.json();
+  const validation = schema.safeParse(body);
   if (params.id > 10)
     return NextResponse.json({ error: "Product not found" }, { status: 404 });
-  if (!body.name)
-    return NextResponse.json({ error: "Name is required" }, { status: 404 });
-  if (!body.price)
-    return NextResponse.json({ error: "Price is required" }, { status: 404 });
+  if (!validation.success)
+    return NextResponse.json(validation.error.errors, { status: 404 });
   return NextResponse.json(
     { id: 1, name: body.name, price: body.price },
     { status: 200 }
