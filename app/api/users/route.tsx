@@ -11,5 +11,13 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
   if (!body.name)
     return NextResponse.json({ error: "Name is required" }, { status: 400 });
-  return NextResponse.json({ id: 1, name: body.name }, { status: 200 });
+  const user = await prisma.user.findUnique({
+    where: { email: body.email },
+  });
+  if (user)
+    return NextResponse.json({ error: "User already exists" }, { status: 400 });
+  const new_user = await prisma.user.create({
+    data: { name: body.name, email: body.email },
+  });
+  return NextResponse.json(new_user, { status: 200 });
 }
